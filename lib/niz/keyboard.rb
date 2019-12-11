@@ -3,30 +3,24 @@ require 'hidapi'
 module Niz
   class Keyboard
     def initialize
-      puts 'open'
-      @device = HIDAPI::open(VENDOR_ID, PRODUCT_ID)
+      @device = HIDAPI.open(VENDOR_ID, PRODUCT_ID)
       @version = version
-      p @version
     end
 
     def close
       @device.close
-puts 'closed'
     end
 
     def send_command(command, data='')
       report_id = 0x00
-      buf = String.new("\0" * 65, encoding: 'BINARY')
-      buf[0] = report_id.chr
-      buf[1, 2] = [command].pack("n")
-      buf[3, [62, data.size].min] = data
-      p buf
+      buf = String.new("\0" * 64, encoding: 'BINARY')
+      buf[0, 2] = [command].pack("n")
+      buf[2, [62, data.size].min] = data
       @device.write(buf)
     end
 
     def recv_data
       ret = @device.read
-      p ret
       ret
     end
 
